@@ -1,0 +1,23 @@
+// CSS Variables
+:root {
+  --bg-color-light: #f7f7f7;
+  --bg-color-dark: #222222;
+  --text-color-light: #f7f7f7;
+  --text-color-dark: #222222;
+  --bg-color: var(--bg-color-dark, --bg-color-light);
+  --yellow: #ffcc5c;
+  --red: #c94c4c;
+  --purple: #4040a1;
+  --blue: #87bdd8;
+  --green: #588c7e;
+
+  --grey: #e0e2e4;
+  --brown: #674d3c;
+  --magenta: #622569;
+  --pink: #e4d1d1;
+  --orange: #ff7b25;
+}
+
+body {
+  background-color: var(--bg-color);
+}
