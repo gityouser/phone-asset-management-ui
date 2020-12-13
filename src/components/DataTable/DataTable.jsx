@@ -12,7 +12,8 @@ import TableRow from "@material-ui/core/TableRow";
 import FormDialog from "../FormDialog";
 
 import { useAjax } from "../../utils/hooks/";
-import { assetStaticProps, assetModel } from "./utils";
+import { assetStaticProps, assetModel, assetsURL } from "./utils";
+import { actionScenarios } from "../FormDialog/utils";
 
 const columns = [
   { id: "type", label: "Type", minWidth: 170 },
@@ -52,12 +53,15 @@ function DataTable() {
   const [rows, setRows] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [formConfig, setFormConfig] = useState({});
-
-  useEffect(() => {
-    fetch("http://localhost:3000/assets/")
+  const fetchAllDataAndSetRows = () => {
+    fetch(assetsURL)
       .then((res) => res.json())
       .then((res) => setRows([...res.data]))
       .catch((err) => console.log("err:", err));
+  };
+
+  useEffect(() => {
+    fetchAllDataAndSetRows();
   }, []);
 
   const handleChangePage = (event, newPage) => {
@@ -71,17 +75,18 @@ function DataTable() {
 
   return (
     <Paper className={classes.root}>
-      <FormDialog
-        open={formOpen}
-        handleClose={() => setFormOpen(false)}
-        assetModel={assetModel}
-        {...formConfig}
-      />
+      <FormDialog open={formOpen} assetModel={assetModel} {...formConfig} />
       <Button
         variant="outlined"
         color="primary"
         onClick={() => {
-          setFormConfig({ ...assetStaticProps.createAsset });
+          setFormConfig({
+            ...assetStaticProps.createAsset,
+            scenario: actionScenarios.create,
+            assetsURL,
+            fetchAllDataAndSetRows,
+            setFormOpen,
+          });
           setFormOpen(true);
         }}
       >
@@ -114,12 +119,20 @@ function DataTable() {
                     key={idx}
                     className={classes.tableRow}
                     onClick={() => {
-                      setFormConfig({ ...assetStaticProps.editAsset });
+                      setFormConfig({
+                        ...assetStaticProps.editAsset,
+                        scenario: actionScenarios.edit,
+                        assetsURL,
+                        fetchAllDataAndSetRows,
+                        rowData: { row },
+                        setFormOpen,
+                      });
                       setFormOpen(true);
                     }}
                   >
                     {columns.map((column) => {
                       const value = row[column.id];
+
                       return (
                         <TableCell key={column.id} align={column.align}>
                           {column.format && typeof value === "number"

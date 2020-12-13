@@ -5,6 +5,7 @@ export const assetModel = {
     required: true,
     trim: true,
     maxLength: 30,
+    handleOnChange: (value) => String(value),
     validateField(value) {
       return !!value && value.length <= this.maxLength;
     },
@@ -14,8 +15,9 @@ export const assetModel = {
   },
   serial: {
     label: "Serial",
-    type: "string",
+    type: "number",
     required: true,
+    handleOnChange: (value) => Number(value),
     validateField(value) {
       return typeof value === this.type;
     },
@@ -28,19 +30,21 @@ export const assetModel = {
     type: "string",
     trim: true,
     enum: ["black", "white", "red", "green"],
-    default: "Black",
+    default: "black",
+    handleOnChange: (value) => String(value).toLowerCase(),
     validateField(value) {
       return (
         typeof value === this.type && this.enum.includes(value.toLowerCase())
       );
     },
     get helperText() {
-      return `${this.default} is the default`;
+      return `${this.enum.map((value) => value).join(", ")}`;
     },
   },
   meta: {
     label: "Meta",
     type: "string",
+    handleOnChange: (value) => String(value),
     validateField(value) {
       return typeof value === this.type;
     },
@@ -58,3 +62,5 @@ export const assetStaticProps = {
     textContent: "To edit this asset, change the values in the inputs below.",
   },
 };
+
+export const assetsURL = "http://localhost:3000/assets";

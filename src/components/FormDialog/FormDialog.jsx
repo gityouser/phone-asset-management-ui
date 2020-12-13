@@ -9,6 +9,9 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { makeStyles } from "@material-ui/core/styles";
 
+import { handleActionScenario } from "./utils";
+import { actionScenarios } from "../FormDialog/utils";
+
 const useStyles = makeStyles((theme) => ({
   root: {
     "& .MuiTextField-root": {
@@ -22,12 +25,15 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function FormDialog({
-  handleClose,
-  handleSubmit,
   open,
   title = "",
   textContent = "",
   assetModel = {},
+  rowData,
+  scenario,
+  assetsURL,
+  fetchAllDataAndSetRows,
+  setFormOpen,
 }) {
   const classes = useStyles();
   const [assetValues, setAssetValues] = useState({});
@@ -35,14 +41,22 @@ function FormDialog({
     (key) => !assetModel[key].validateField(assetValues[key])
   );
 
+  const { handleClose, handleSubmit, handleDelete } = handleActionScenario({
+    scenario,
+    assetsURL,
+    rowData,
+    fetchAllDataAndSetRows,
+    setFormOpen,
+  });
+
   useEffect(() => {
     setAssetValues(
       Object.keys(assetModel).reduce(
-        (acc, key) => ({ ...acc, [key]: assetModel[key].default || null }),
+        (acc, key) => ({ ...acc, [key]: rowData?.row[key] || "" }),
         {}
       )
     );
-  }, [assetModel]);
+  }, [rowData]);
 
   return (
     <div>
@@ -57,17 +71,18 @@ function FormDialog({
           <DialogContentText>{textContent}</DialogContentText>
           {Object.keys(assetModel).map((modelKey, index) => (
             <TextField
+              value={assetValues[modelKey]}
               key={index}
               onChange={(e) =>
                 setAssetValues({
                   ...assetValues,
-                  [modelKey]: e.target.value || assetModel[modelKey].default,
+                  [modelKey]: assetModel[modelKey].handleOnChange(
+                    e.target.value
+                  ),
                 })
               }
               label={assetModel[modelKey].label}
-              defaultValue=""
               helperText={assetModel[modelKey].helperText}
-              defaultValue={assetModel[modelKey].default}
               type={assetModel[modelKey].type}
               variant="outlined"
             />
@@ -82,23 +97,26 @@ function FormDialog({
           >
             Cancel
           </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            className={classes.button}
-            startIcon={<DeleteIcon />}
-          >
-            Delete
-          </Button>
+          {scenario === actionScenarios.edit && (
+            <Button
+              onClick={handleDelete}
+              variant="contained"
+              color="secondary"
+              className={classes.button}
+              startIcon={<DeleteIcon />}
+            >
+              Delete
+            </Button>
+          )}
           <Button
             onClick={() => {
-              handleSubmit();
+              handleSubmit(assetValues);
             }}
             color="primary"
             variant="contained"
             disabled={isSubmitDisabled}
           >
-            Add
+            {scenario === actionScenarios.create ? "Add" : "Update"}
           </Button>
         </DialogActions>
       </Dialog>
