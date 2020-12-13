@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
+import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -8,6 +9,11 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
+import FormDialog from "../FormDialog";
+
+import { useAjax } from "../../utils/hooks/";
+import { assetStaticProps, assetModel, assetsURL } from "./utils";
+import { actionScenarios } from "../FormDialog/utils";
 
 const columns = [
   { id: "type", label: "Type", minWidth: 170 },
@@ -28,41 +34,35 @@ const columns = [
   },
 ];
 
-function createData(type, serial, color, metaData) {
-  return { type, serial, color, metaData };
-}
-
-const rows = [
-  createData("asdfasdf", "ISADFN", 1324171354, 3287263),
-  createData("Chisadfasdfna", "CASDFN", 1403500365, 9596961),
-  createData("Itasdfasdfgasfgaly", "SADFIT", 60483973, 301340),
-  createData("Unisadfted Stasfgasgates", "UASADFS", 327167434, 9833520),
-  createData("Canasfgasfgada", "CFASDA", 37602103, 9984670),
-  createData("Ausasfgasftralia", "ASFAU", 25475400, 7692024),
-  createData("Geasfgrmany", "FGFDE", 83019200, 357578),
-  createData("Irasfgasfgeland", "ASIE", 4857000, 70273),
-  createData("Mesafgasfxico", "MGFAX", 126577691, 1972550),
-  createData("Jaadsfgsfgpan", "SADFJP", 126317000, 377973),
-  createData("Fraasfgsfnce", "SADFFR", 67022000, 640679),
-  createData("Unidsfgsdfted Kdsfgingfsdgsdfgdom", "SFGGB", 67545757, 242495),
-  createData("Ruasfdgassia", "GARUASF", 146793744, 17098246),
-  createData("Nasfgigefsaria", "NASFGG", 200962417, 923768),
-  createData("Brasfgaasfgzil", "ASFGDBR", 210147125, 8515767),
-];
-
 const useStyles = makeStyles({
   root: {
     width: "100%",
   },
   container: {
-    maxHeight: 440,
+    maxHeight: 600,
+  },
+  tableRow: {
+    cursor: "pointer",
   },
 });
 
 function DataTable() {
   const classes = useStyles();
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rows, setRows] = useState([]);
+  const [formOpen, setFormOpen] = useState(false);
+  const [formConfig, setFormConfig] = useState({});
+  const fetchAllDataAndSetRows = () => {
+    fetch(assetsURL)
+      .then((res) => res.json())
+      .then((res) => setRows([...res.data]))
+      .catch((err) => console.log("err:", err));
+  };
+
+  useEffect(() => {
+    fetchAllDataAndSetRows();
+  }, []);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -75,6 +75,23 @@ function DataTable() {
 
   return (
     <Paper className={classes.root}>
+      <FormDialog open={formOpen} assetModel={assetModel} {...formConfig} />
+      <Button
+        variant="outlined"
+        color="primary"
+        onClick={() => {
+          setFormConfig({
+            ...assetStaticProps.createAsset,
+            scenario: actionScenarios.create,
+            assetsURL,
+            fetchAllDataAndSetRows,
+            setFormOpen,
+          });
+          setFormOpen(true);
+        }}
+      >
+        Add new asset
+      </Button>
       <TableContainer className={classes.container}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
@@ -93,11 +110,29 @@ function DataTable() {
           <TableBody>
             {rows
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => {
+              .map((row, idx) => {
                 return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
+                  <TableRow
+                    hover
+                    role="checkbox"
+                    tabIndex={-1}
+                    key={idx}
+                    className={classes.tableRow}
+                    onClick={() => {
+                      setFormConfig({
+                        ...assetStaticProps.editAsset,
+                        scenario: actionScenarios.edit,
+                        assetsURL,
+                        fetchAllDataAndSetRows,
+                        rowData: { row },
+                        setFormOpen,
+                      });
+                      setFormOpen(true);
+                    }}
+                  >
                     {columns.map((column) => {
                       const value = row[column.id];
+
                       return (
                         <TableCell key={column.id} align={column.align}>
                           {column.format && typeof value === "number"

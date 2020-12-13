@@ -44,4 +44,7 @@ module.exports = {
       Constants: path.resolve(__dirname, "./src/utils/constants/"),
     },
   },
+  devServer: {
+    historyApiFallback: true,
+  },
 };

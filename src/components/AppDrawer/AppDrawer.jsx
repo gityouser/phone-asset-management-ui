@@ -152,8 +152,12 @@ function AppDrawer({ routes, children }) {
           <Divider />
           <List>
             {routes.map((route, index) => (
-              <Link to={route.path} style={{ textDecoration: "none" }}>
-                <ListItem button key={index}>
+              <Link
+                to={route.path}
+                style={{ textDecoration: "none" }}
+                key={index}
+              >
+                <ListItem button>
                   <ListItemIcon>{route.icon}</ListItemIcon>
                   <ListItemText primary={route.title} />
                 </ListItem>
