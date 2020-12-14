@@ -4,8 +4,9 @@
   "description": "React-Redux-SPA which allows for showing, storing, and editing various views by dragging them around the viewport.",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --mode development --open --hot",
-    "build": "webpack --mode production"
+    "dev": "webpack-dev-server --mode development --open --hot",
+    "build": "webpack --mode production",
+    "start": "http-server ./dist"
   },
   "browserslist": [
     "since 2017-06"
@@ -31,6 +32,7 @@
     "@babel/plugin-transform-async-to-generator": "^7.12.1",
     "@material-ui/core": "^4.11.2",
     "@material-ui/icons": "^4.11.2",
+    "http-server": "^0.12.3",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-redux": "^7.2.0",
